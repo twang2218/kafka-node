@@ -48,4 +48,19 @@ describe('BaseProducer', function () {
       done();
     });
   });
+  describe('.buildPayloads()', function () {
+    it('should use request "key" as each message key', function () {
+      const fakeClient = new Client();
+
+      fakeClient.topicMetadata = {
+        MyTopic: [0],
+        YourTopic: [0, 1, 2]
+      };
+
+      const producer = new BaseProducer(fakeClient, {}, BaseProducer.PARTITIONER_TYPES.keyed);
+      const payload = [{ topic: 'MyTopic', messages: ['hello', 'haloha'], key: 'hikey' }];
+      const requests = producer.buildPayloads(payload, fakeClient.topicMetadata);
+      requests[0].messages.filter(function (m) { return m.key === 'hikey'; }).length.should.equal(2);
+    });
+  });
 });
